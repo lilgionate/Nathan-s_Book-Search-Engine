@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import { useMutation } from '@apollo/client'; // Import the necessary hook
-import { ADD_USER } from '../mutations'; // Import the ADD_USER mutation
+import { ADD_USER } from '../utils/mutation'; // Import the ADD_USER mutation
 import Auth from '../utils/auth';
 
 const SignupForm = () => {
