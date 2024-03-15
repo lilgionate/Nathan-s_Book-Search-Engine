@@ -4,7 +4,7 @@ import './App.css';
 import { Outlet } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
-import { client } from './apollo'; // Import your Apollo Client instance
+import client from './apollo'; // Import the client from the correct path
 
 function App() {
   return (
