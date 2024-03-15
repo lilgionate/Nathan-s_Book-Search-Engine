@@ -1,16 +1,16 @@
-// see SignupForm.js for comments
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
-
+import { useMutation } from '@apollo/client'; // Import the necessary hook
+import { LOGIN_USER } from '../mutations'; // Import the LOGIN_USER mutation
 import Auth from '../utils/auth';
-import { useMutation } from '@apollo/client';
-import { LOGIN_USER } from '../utils/mutation';
 
 const LoginForm = () => {
   const [userFormData, setUserFormData] = useState({ email: '', password: '' });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  const [loginUser] = useMutation(LOGIN_USER);
+
+  // Define the useMutation hook for the LOGIN_USER mutation
+  const [loginUserMutation] = useMutation(LOGIN_USER);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -20,7 +20,7 @@ const LoginForm = () => {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
 
-    // check if form has everything (as per react-bootstrap docs)
+    // Check if form has everything (as per react-bootstrap docs)
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
       event.preventDefault();
@@ -28,21 +28,23 @@ const LoginForm = () => {
     }
 
     try {
-      const { data } = await loginUser({
-        variables: {...userFormData} 
+      // Execute the LOGIN_USER mutation
+      const { data } = await loginUserMutation({
+        variables: { ...userFormData }
       });
 
-      Auth.login(data.login.token);
+      // Get the token and user data from the mutation response
+      const { token, user } = data.login;
+
+      // Login the user with the received token
+      Auth.login(token);
     } catch (err) {
       console.error(err);
       setShowAlert(true);
     }
 
-    setUserFormData({
-      username: '',
-      email: '',
-      password: '',
-    });
+    // Reset the form data
+    setUserFormData({ email: '', password: '' });
   };
 
   return (
@@ -51,7 +53,7 @@ const LoginForm = () => {
         <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert} variant='danger'>
           Something went wrong with your login credentials!
         </Alert>
-        <Form.Group>
+        <Form.Group className='mb-3'>
           <Form.Label htmlFor='email'>Email</Form.Label>
           <Form.Control
             type='text'
@@ -64,7 +66,7 @@ const LoginForm = () => {
           <Form.Control.Feedback type='invalid'>Email is required!</Form.Control.Feedback>
         </Form.Group>
 
-        <Form.Group>
+        <Form.Group className='mb-3'>
           <Form.Label htmlFor='password'>Password</Form.Label>
           <Form.Control
             type='password'

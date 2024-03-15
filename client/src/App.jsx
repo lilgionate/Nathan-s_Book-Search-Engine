@@ -1,41 +1,23 @@
-import React from 'react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import './App.css';
 import { ApolloProvider } from '@apollo/client';
-import ApolloClient from 'apollo-boost'
-import SearchBooks from './pages/SearchBooks';
-import SavedBooks from './pages/SavedBooks';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
-
-const client = new ApolloClient({
-  request: (operation) => {
-    const token = localStorage.getItem("id_token");
-
-    operation.setContext({
-      headers: {
-        authorization: token ? `Bearer ${token}` : "",
-      },
-    });
-  },
-  uri: "/graphql",
-});
-
-
+import Home from './pages/Home'; // Example import for a Home page component
+import { client } from './apollo'; // Import your Apollo Client instance
 
 function App() {
   return (
-  <ApolloProvider  client ={client}>
-       <Router>
-      <>
-        <Navbar />
-        <Switch>
-          <Route exact path='/' component={SearchBooks} />
-          <Route exact path='/saved' component={SavedBooks} />
-          <Route render={() => <h1 className='display-2'>Wrong page!</h1>} />
-        </Switch>
-      </>
-    </Router>
-  </ApolloProvider>
- 
+    <ApolloProvider client={client}>
+      <Router>
+        <>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            {/* Add more routes here as needed */}
+          </Routes>
+        </>
+      </Router>
+    </ApolloProvider>
   );
 }
 
