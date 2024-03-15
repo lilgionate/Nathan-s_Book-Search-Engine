@@ -1,29 +1,28 @@
 const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
-const path = require('path');
-const db = require('./config/connection');
-const { typeDefs, resolvers } = require('./schemas');
-const { authMiddleware } = require('./utils/auth');
+const { typeDefs, resolvers } = require('./schemas'); // Import your GraphQL schema files
+const { authMiddleware } = require('./utils/auth'); // Import any middleware for authentication
 
+// Create an Express app
 const app = express();
-const PORT = process.env.PORT || 3001;
 
-async function startApolloServer() {
-  const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-    context: authMiddleware // Apply authentication middleware to all resolvers
-  });
+// Set up Apollo Server
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: authMiddleware, // Optional: Apply authentication middleware
+});
 
-  await server.start();
-
+// Start the Apollo Server
+server.start().then(() => {
+  // Apply Apollo Server middleware to Express app
   server.applyMiddleware({ app });
 
-  db.once('open', () => {
-    app.listen(PORT, () =>
-      console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`)
-    );
-  });
-}
+  // Define port
+  const PORT = process.env.PORT || 3000;
 
-startApolloServer();
+  // Start Express server
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}${server.graphqlPath}`);
+  });
+});

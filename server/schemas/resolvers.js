@@ -6,54 +6,82 @@ const resolvers = {
     Query: {
         me: async (parent, args, context) => {
             if (context.user) {
-                const userData = await User.findOne({ _id: context.user._id })
-                .select('-__v -password')
-                return userData;
+                try {
+                    const userData = await User.findById(context.user._id).populate('savedBooks');
+                    return userData;
+                } catch (err) {
+                    console.error(err);
+                    throw new AuthenticationError('Cannot find user data');
+                }
             }
             throw new AuthenticationError('Not logged in');
         }
     },
     Mutation: {
         addUser: async (parent, args) => {
-            const user = await User.create(args);
-            const token = signToken(user);
-
-            return { token, user };
+            try {
+                const user = await User.create(args);
+                const token = signToken(user);
+                return { token, user };
+            } catch (err) {
+                console.error(err);
+                throw new AuthenticationError('Failed to create user');
+            }
         },
         login: async (parent, { email, password }) => {
-            const user = await User.findOne( { email });
-            if (!user) {
-                throw new AuthenticationError('Incorrect credentials')
+            try {
+                const user = await User.findOne({ email });
+
+                if (!user) {
+                    throw new AuthenticationError('Incorrect credentials');
+                }
+
+                const correctPw = await user.isCorrectPassword(password);
+
+                if (!correctPw) {
+                    throw new AuthenticationError('Incorrect credentials');
+                }
+
+                const token = signToken(user);
+                return { token, user };
+            } catch (err) {
+                console.error(err);
+                throw new AuthenticationError('Login failed');
             }
-            const correctPw = await user.isCorrectPassword(password);
-            if(!correctPw) {
-                throw new AuthenticationError('Incorrect credentials')
-            }
-            const token = signToken(user);
-            return { token, user };
         },
         saveBook: async (parent, { book }, context) => {
             if (context.user) {
-                const updatedUser = await User.findOneAndUpdate(
-                    { _id: context.user._id },
-                    { $addToSet: {savedBooks: book} },
-                    { new: true }
-                )
-                return updatedUser;
+                try {
+                    const updatedUser = await User.findByIdAndUpdate(
+                        context.user._id,
+                        { $addToSet: { savedBooks: book } },
+                        { new: true }
+                    ).populate('savedBooks');
+                    return updatedUser;
+                } catch (err) {
+                    console.error(err);
+                    throw new AuthenticationError('Failed to save book');
+                }
             }
-            throw new AuthenticationError('You need to be logged in!')
+            throw new AuthenticationError('You need to be logged in');
         },
         removeBook: async (parent, { bookId }, context) => {
             if (context.user) {
-                const updatedUser = await User.findOneAndUpdate(
-                    {_id: context.user._id},
-                    { $pull: { savedBooks: { bookId: bookId } } },
-                    { new: true }
-                )
-                return updatedUser;
+                try {
+                    const updatedUser = await User.findByIdAndUpdate(
+                        context.user._id,
+                        { $pull: { savedBooks: { bookId: bookId } } },
+                        { new: true }
+                    ).populate('savedBooks');
+                    return updatedUser;
+                } catch (err) {
+                    console.error(err);
+                    throw new AuthenticationError('Failed to remove book');
+                }
             }
+            throw new AuthenticationError('You need to be logged in');
         }
     }
-  };
-  
-  module.exports = resolvers;
+};
+
+module.exports = resolvers;

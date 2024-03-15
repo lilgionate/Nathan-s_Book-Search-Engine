@@ -1,14 +1,14 @@
 const jwt = require('jsonwebtoken');
+const { AuthenticationError } = require('apollo-server-express');
 
 // set token secret and expiration date
 const secret = 'mysecretsshhhhh';
 const expiration = '2h';
 
 module.exports = {
-  // function for our authenticated routes
   authMiddleware: function ({ req }) {
-    // allows token to be sent via headers
-    let token = req.headers.authorization || '';
+    // allows token to be sent via context
+    let token = req.body.token || req.query.token || req.headers.authorization || '';
 
     if (!token) {
       return { user: null };
@@ -20,8 +20,7 @@ module.exports = {
       const user = data;
       return { user };
     } catch (err) {
-      console.error('Invalid token', err);
-      return { user: null };
+      throw new AuthenticationError('Invalid token');
     }
   },
   signToken: function ({ username, email, _id }) {
