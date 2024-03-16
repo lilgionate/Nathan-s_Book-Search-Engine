@@ -1,4 +1,4 @@
-
+import { useEffect, useState } from 'react';
 import { Container, Card, Button, Row, Col } from 'react-bootstrap';
 import { useQuery, useMutation } from '@apollo/client'; // Import the necessary hooks
 import { GET_ME } from '../utils/queries'; // Import the GET_ME query
@@ -9,10 +9,14 @@ import { removeBookId } from '../utils/localStorage';
 const SavedBooks = () => {
 
   // Use useQuery hook to execute GET_ME query
-  const { loading, error, data } = useQuery(GET_ME);
+  const { loading, error, data, refetch } = useQuery(GET_ME);
 
   // Define useMutation hook for REMOVE_BOOK mutation
   const [removeBookMutation] = useMutation(REMOVE_BOOK);
+
+  useEffect(() => {
+    refetch()
+  });
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
