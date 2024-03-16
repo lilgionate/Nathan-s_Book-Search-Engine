@@ -1,6 +1,6 @@
 const express = require('express');
-const { ApolloServer } = require('@apollo/server-express'); // Change import statement
-const { expressMiddleware } = require('@apollo/server-express');
+const { ApolloServer } = require('@apollo/server'); // Change import statement
+const { expressMiddleware } = require('@apollo/server/express4');
 const path = require('path');
 
 const { typeDefs, resolvers } = require('./schemas');
