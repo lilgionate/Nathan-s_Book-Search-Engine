@@ -8,15 +8,17 @@ const expiration = '2h';
 module.exports = {
   authMiddleware: function ({ req }) {
     // allows token to be sent via context
-    let token = req.body.token || req.query.token || req.headers.authorization || '';
+    let token = req.headers.authorization || '';
 
     if (!token) {
       return { user: null };
     }
 
     try {
+      // Extract the token from the "Bearer <token>" format
+      token = token.split(' ')[1];
       // Verify token and extract user data
-      const { data } = jwt.verify(token, secret, { maxAge: expiration });
+      const { data } = jwt.verify(token, secret);
       const user = data;
       return { user };
     } catch (err) {

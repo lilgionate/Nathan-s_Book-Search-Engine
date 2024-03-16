@@ -1,10 +1,15 @@
 import React from 'react';
-import { ApolloProvider } from '@apollo/client';
+import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client'; // Import ApolloClient and InMemoryCache
 import './App.css';
 import { Outlet } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
-import client from './apollo'; // Import the client from the correct path
+
+// Create an ApolloClient instance
+const client = new ApolloClient({
+  uri: '/graphql',
+  cache: new InMemoryCache(),
+});
 
 function App() {
   return (
