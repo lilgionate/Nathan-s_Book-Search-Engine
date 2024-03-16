@@ -1,6 +1,7 @@
 const express = require('express');
 const { ApolloServer } = require('@apollo/server'); // Change import statement
 const { expressMiddleware } = require('@apollo/server/express4');
+const { authMiddleware } = require('./utils/auth');
 const path = require('path');
 
 const { typeDefs, resolvers } = require('./schemas');
@@ -19,7 +20,9 @@ const startApolloServer = async () => {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
 
-  server.applyMiddleware({ app }); // Apply Apollo Server middleware
+  app.use('/graphql', expressMiddleware(server, {
+    context: authMiddleware
+  }));
 
   // Serve static assets if in production
   if (process.env.NODE_ENV === 'production') {
